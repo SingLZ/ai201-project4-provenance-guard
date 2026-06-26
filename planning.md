@@ -492,7 +492,7 @@ These values are intentionally conservative for a student project that may use a
 
 ## Audit Log Plan
 
-The first implementation will use SQLite because it is built into Python and does not require a separate service. Audit records should be append-only. Updating content status is allowed in the content table, but audit events should preserve historical events.
+The first implementation will use structured JSONL files because Milestone 3 only needs append-only decision logging and simple grading visibility through GET /log. A later version may upgrade this to SQLite if the appeal workflow needs richer querying.
 
 ### Main Tables
 
