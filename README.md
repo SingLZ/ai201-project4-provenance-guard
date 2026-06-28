@@ -578,3 +578,7 @@ A short walkthrough video should show:
 6. A `/appeal` response showing `under_review`.
 7. `/log` output showing `classification_decision`, `appeal_created`, and `status_updated`.
 8. A quick explanation of why uncertain labels and appeals matter for false-positive safety.
+
+## Portfolio Walkthrough
+
+[![Provenance Guard walkthrough](https://img.youtube.com/vi/uUzwvC5iRME/maxresdefault.jpg)](https://www.youtube.com/watch?v=uUzwvC5iRME)
