@@ -39,7 +39,7 @@ If a creator contests a classification, they submit `POST /appeal` with the cont
 Client / Creative Platform
         |
         | POST /submit
-        | {creator_id, title, content_type, content}
+        | {creator_id, text, title?, content_type?}
         v
 API Layer
         |
@@ -374,7 +374,7 @@ Automated re-classification is not required in the first version. The appeal sys
 
 ### `POST /submit`
 
-Accepts text content for attribution analysis.
+Accepts text content for attribution analysis. The required fields are `creator_id` and `text`; `title` and `content_type` are optional. If `content_type` is omitted, the system treats the request as text.
 
 **Request**
 
@@ -383,7 +383,7 @@ Accepts text content for attribution analysis.
   "creator_id": "creator_123",
   "title": "Short Story Draft",
   "content_type": "text",
-  "content": "The submitted poem, story excerpt, or blog post goes here."
+  "text": "The submitted poem, story excerpt, or blog post goes here."
 }
 ```
 
@@ -394,6 +394,7 @@ Accepts text content for attribution analysis.
   "content_id": "content_abc123",
   "status": "classified",
   "attribution_result": "uncertain",
+  "ai_likelihood": 0.60,
   "confidence_score": 0.60,
   "transparency_label": "Provenance Guard could not confidently determine whether this text was human-written or AI-generated. The result is uncertain, so no strong attribution claim is being made.",
   "signals": [
@@ -427,7 +428,7 @@ Accepts text content for attribution analysis.
 | Condition | Response |
 |---|---|
 | Missing `creator_id` | `400 Bad Request` |
-| Missing or empty `content` | `400 Bad Request` |
+| Missing or empty `text` | `400 Bad Request` |
 | Unsupported `content_type` | `400 Bad Request` |
 | Request exceeds rate limit | `429 Too Many Requests` |
 | Groq API unavailable | Return response using heuristic only, mark LLM signal unavailable, and log degraded mode. |
@@ -492,16 +493,16 @@ These values are intentionally conservative for a student project that may use a
 
 ## Audit Log Plan
 
-The first implementation will use structured JSONL files because Milestone 3 only needs append-only decision logging and simple grading visibility through GET /log. A later version may upgrade this to SQLite if the appeal workflow needs richer querying.
+The first implementation will use structured JSONL files because Milestone 3 only needs append-only decision logging and simple grading visibility through `GET /log`. Milestones 4 and 5 will continue with JSONL unless the implementation is intentionally migrated to SQLite.
 
-### Main Tables
+### Main JSONL Record Types
 
-| Table | Purpose |
+| Record Type | Purpose |
 |---|---|
-| `content` | Stores submitted content metadata, final status, result, score, and label text. |
-| `classification_decisions` | Stores one classification decision per submission, including signal outputs. |
-| `appeals` | Stores creator appeals linked to content records. |
-| `audit_log` | Stores append-only structured events for decisions, appeals, and status changes. |
+| `content_record` | Stores submitted content metadata, final status, result, score, and label text. |
+| `classification_decision` | Stores one classification decision per submission, including signal outputs. |
+| `appeal_record` | Stores creator appeals linked to content records. |
+| `audit_event` | Stores append-only structured events for decisions, appeals, and status changes. |
 
 ### Audit Event Types
 
@@ -626,7 +627,7 @@ The first implementation will use structured JSONL files because Milestone 3 onl
 **Ask the AI tool to generate**
 
 - Label generation function with the three exact label strings.
-- SQLite schema and initialization.
+- JSONL storage helpers for content records, appeals, and audit events.
 - Audit logger for classification, appeal, and status update events.
 - `POST /appeal` endpoint.
 - `GET /content/<content_id>` endpoint.

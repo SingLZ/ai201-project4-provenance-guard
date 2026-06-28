@@ -1,5 +1,6 @@
 .venv/
 __pycache__/
+*.pyc
 .env
-data/
-.DS_Store
+data/*.jsonl
+data/*.json
